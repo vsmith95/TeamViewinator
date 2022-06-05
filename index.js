@@ -1,17 +1,17 @@
 const inquirer = require("inquirer");
 require("console.table");
-const connection = require(".connection");
+const connection = require("./connection");
 
 // Main Menu
 const menuPrompt = [{
     name: "menu",
     type: "list",
     message: "How may I help you?",
-    choice: ["See Roles", "See Departments", "See all Employees", "Add role", "Add Department", "Add Employee", "Update Existing Employee", "Nevermind..."]
+    choices: ["See Roles", "See Departments", "See all Employees", "Add Role", "Add Department", "Add Employee", "Update Existing Employee", "Nevermind..."]
 }];
 
 // "Add" Prompts
-const addRolePrompt = [
+const rolePrompt = [
     {
         name: "role",
         type: "input",
@@ -31,7 +31,7 @@ const addRolePrompt = [
     }
 ];
 
-const addDepartmentPrompt = [
+const departmentPrompt = [
     {
         name: "department",
         type: "input",
@@ -39,7 +39,7 @@ const addDepartmentPrompt = [
     }
 ];
 
-const addEmployeePromt = [
+const employeePrompt = [
     {
         name: "firstName",
         type: "input",
@@ -65,37 +65,173 @@ const addEmployeePromt = [
     }
 ];
 
+async function addDepartment() {
+    await inquirer.prompt(departmentPrompt)
+        .then((answers) => {
+            connection.query(`INSERT INTO departments(name) VALUES (?)`, answers.department, (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                console.table(result)
+                connection.query(`SELECT * FROM departments`, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    };
+                    console.table(result);
+                    startMenu();
+                });
+            });
+        }); 
+};
+
+function addRole() {
+    connection.query(`SELECT * FROM departments`, (err, result) => {
+        if (err) {
+            console.log(err)
+        };
+        console.table(result)
+        inquirer.prompt(rolePrompt)
+            .then((answers) => {
+                connection.query(`INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`, [answers.title, answers.salary, answers.departmentID], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    };
+                    console.table(result)
+                    connection.query(`SELECT * FROM role`, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        };
+                        console.table(result);
+                        startMenu();
+                    });
+                });
+            });
+    });
+};
+
+function addEmployee() {
+    connection.query(`SELECT * FROM role`, (err, result) => {
+        if (err) {
+            console.log(err)
+        };
+        console.table(result)
+        inquirer.prompt(employeePrompt)
+            .then((answers) => {
+                connection.query(`INSERT INTO employee(first_name, last_name, manager_id, role_id) VALUES (?, ?, ?, ?)`, [answers.fristName, answers.lastName, answers.managerID, answers.roleID], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    };
+                    console.table(result)
+                    connection.query(`SELECT * FROM employee`, (err, result) => {
+                        if (err) {
+                            console.log(err)
+                        };
+                        console.table(result);
+                        startMenu();
+                    });
+                });
+            });
+    });
+};
+
 // Calls
 function seeDepartments() {
-    connection.query("SELECT * FROM departments", (err, results) => {
+    connection.query(`SELECT * FROM departments`, (err, result) => {
         if (err) {
             console.log(err);
-        }
-        console.table(results);
+        };
+        console.table(result);
         startMenu();
     });
 };
 
 function seeRoles() {
-    connection.query("SELECT * FROM roles", (err, results) => {
+    connection.query(`SELECT * FROM roles`, (err, result) => {
         if (err) {
             console.log(err);
-        }
-        console.table(results);
+        };
+        console.table(result);
         startMenu();
     });
 };
 
 function seeEmployees() {
-    connection.query("SELECT * FROM employees", (err, results) => {
+    connection.query(`SELECT * FROM employees`, (err, result) => {
         if (err) {
             console.log(err);
-        }
-        console.table(results);
+        };
+        console.table(result);
         startMenu();
     });
 };
 
+function updateRole() {
+    connection.query(`SELECT * FROM role`, (err, result) => {
+        if (err) {
+            console.log(err)
+        };
+        console.table(result);
+        const chooseRole = result.map(obj => {
+            return { 
+                name: obj.title,
+                value: obj.id
+            };
+        });
+        const updatePrompt = [
+            {
+            name: "employees",
+            type: "list",
+            message: "Which employee are you trying to update?",
+            choices: employeeSelect
+        },
+        {
+            name: "roles",
+            input: "list",
+            message: "What role would you like to give them?",
+            choices: roleSelect
+        }
+    ];
+    inquirer.prompt(updatePrompt)
+        .then((answers) => {
+            connection.query(`UPDATE employee SET role_id = ? WHERE id = ?`, [answers.roles, answers.employees], (err, result) => {
+                if (err) {
+                    console.log(err)
+                };
+                console.table(result);
+                connection.query(`SELECT * FROM employee`, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    };
+                    console.table(result);
+                    startMenu();
+                });
+            });
+        });
+    });
+};
+
+function startMenu() {
+    inquirer.prompt(menuPrompt)
+        .then((answers) => {
+            if (answers.menu === "See roles") {
+                seeRoles();
+            } else if (answers.menu === "See Departments") {
+                seeDepartments();
+            } else if (answers.menu === "See all Employees") {
+                seeEmployees();
+            } else if (answers.menu === "Add Role") {
+                addRole();
+            } else if (answers.menu === "Add Department") {
+                addDepartment();
+            } else if (answers.menu === "Add Employee") {
+                addEmployee();
+            } else if (answers.menu === "Update Existing Employee") {
+                updateRole();
+            } else if (answers.menu === "Nevermind...") {
+                return;
+            };
+        });
+};
 
 // Keep this at the bottom
 startMenu();
