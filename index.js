@@ -1,5 +1,5 @@
 const inquirer = require("inquirer");
-require("console.table");
+const cTable = require("console.table");
 const connection = require("./connection");
 
 // Main Menu
@@ -227,7 +227,8 @@ function startMenu() {
                 addEmployee();
             } else if (answers.menu === "Update Existing Employee") {
                 updateRole();
-            } else if (answers.menu === "Nevermind...") {
+            } 
+            else if (answers.menu === "Nevermind...") {
                 return;
             };
         });
