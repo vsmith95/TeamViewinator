@@ -7,13 +7,13 @@ const menuPrompt = [{
     name: "menu",
     type: "list",
     message: "How may I help you?",
-    choices: ["See Roles", "See Departments", "See all Employees", "Add Role", "Add Department", "Add Employee", "Update Existing Employee", "Nevermind..."]
+    choices: ["See Roles", "See Departments", "See all Employees", "Add Role", "Add Department", "Add Employee", "Update Existing Employee", "Nevermind"]
 }];
 
 // "Add" Prompts
 const rolePrompt = [
     {
-        name: "role",
+        name: "title",
         type: "input",
         message: "What is the role?"
     },
@@ -92,12 +92,12 @@ function addRole() {
         console.table(result)
         inquirer.prompt(rolePrompt)
             .then((answers) => {
-                connection.query(`INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`, [answers.title, answers.salary, answers.departmentID], (err, result) => {
+                connection.query(`INSERT INTO roles(title, salary, department_id) VALUES (?,?,?)`, [answers.title, answers.salary, answers.departmentID], (err, result) => {
                     if (err) {
                         console.log(err)
                     };
                     console.table(result)
-                    connection.query(`SELECT * FROM role`, (err, result) => {
+                    connection.query(`SELECT * FROM roles`, (err, result) => {
                         if (err) {
                             console.log(err)
                         };
@@ -110,19 +110,19 @@ function addRole() {
 };
 
 function addEmployee() {
-    connection.query(`SELECT * FROM role`, (err, result) => {
+    connection.query(`SELECT * FROM roles`, (err, result) => {
         if (err) {
             console.log(err)
         };
         console.table(result)
         inquirer.prompt(employeePrompt)
             .then((answers) => {
-                connection.query(`INSERT INTO employee(first_name, last_name, manager_id, role_id) VALUES (?, ?, ?, ?)`, [answers.fristName, answers.lastName, answers.managerID, answers.roleID], (err, result) => {
+                connection.query(`INSERT INTO employees(first_name, last_name, manager_id, role_id) VALUES (?, ?, ?, ?)`, [answers.firstName, answers.lastName, answers.managerID, answers.roleID], (err, result) => {
                     if (err) {
                         console.log(err)
                     };
                     console.table(result)
-                    connection.query(`SELECT * FROM employee`, (err, result) => {
+                    connection.query(`SELECT * FROM employees`, (err, result) => {
                         if (err) {
                             console.log(err)
                         };
@@ -166,7 +166,7 @@ function seeEmployees() {
 };
 
 function updateRole() {
-    connection.query(`SELECT * FROM role`, (err, result) => {
+    connection.query(`SELECT * FROM roles`, (err, result) => {
         if (err) {
             console.log(err)
         };
@@ -180,25 +180,23 @@ function updateRole() {
         const updatePrompt = [
             {
             name: "employees",
-            type: "list",
-            message: "Which employee are you trying to update?",
-            choices: employeeSelect
+            type: "input",
+            message: "Which employee are you trying to update?"
         },
         {
             name: "roles",
-            input: "list",
-            message: "What role would you like to give them?",
-            choices: roleSelect
+            input: "input",
+            message: "What role would you like to give them?"
         }
     ];
     inquirer.prompt(updatePrompt)
         .then((answers) => {
-            connection.query(`UPDATE employee SET role_id = ? WHERE id = ?`, [answers.roles, answers.employees], (err, result) => {
+            connection.query(`UPDATE employees SET role_id = ? WHERE id = ?`, [answers.roles, answers.employees], (err, result) => {
                 if (err) {
                     console.log(err)
                 };
                 console.table(result);
-                connection.query(`SELECT * FROM employee`, (err, result) => {
+                connection.query(`SELECT * FROM employees`, (err, result) => {
                     if (err) {
                         console.log(err)
                     };
@@ -213,7 +211,7 @@ function updateRole() {
 function startMenu() {
     inquirer.prompt(menuPrompt)
         .then((answers) => {
-            if (answers.menu === "See roles") {
+            if (answers.menu === "See Roles") {
                 seeRoles();
             } else if (answers.menu === "See Departments") {
                 seeDepartments();
@@ -228,7 +226,7 @@ function startMenu() {
             } else if (answers.menu === "Update Existing Employee") {
                 updateRole();
             } 
-            else if (answers.menu === "Nevermind...") {
+            else if (answers.menu === "Nevermind") {
                 return;
             };
         });
