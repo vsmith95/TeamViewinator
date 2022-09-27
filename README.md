@@ -23,3 +23,6 @@
   ### Email: vaughnsmith95@gmail.com
 
   ## License: MIT  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![image](https://user-images.githubusercontent.com/97266465/192567041-d890ef28-9f5c-4d42-92df-d749cc959a9b.png)
+![image](https://user-images.githubusercontent.com/97266465/192567153-9785424b-4124-4de8-9004-b73dcfec664e.png)
+![image](https://user-images.githubusercontent.com/97266465/192567502-8562d912-77db-4251-9895-c70cd5a4e53e.png)
